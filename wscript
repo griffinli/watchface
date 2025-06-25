@@ -4,13 +4,36 @@
 # Feel free to customize this to your needs.
 #
 import os.path
-
+import os
+import sys
+from waflib import Context
 top = '.'
 out = 'build'
 
 
 def options(ctx):
+    # The Pebble SDK tools are in three different locations. We must add all
+    # of them to the Python path for the build to work.
+
+    # --- Path 1: The 'extras' directory for pebble_sdk.py itself ---
+    base_waf_dir = Context.waf_dir
+    extras_dir = os.path.join(base_waf_dir, 'waflib', 'extras')
+    sys.path.insert(0, extras_dir)
+
+    # --- Path 2: The 'common/tools' directory for dependencies like generate_appinfo ---
+    sdk_dir = os.path.dirname(base_waf_dir)
+    common_tools_dir = os.path.join(sdk_dir, 'common', 'tools')
+    sys.path.insert(0, common_tools_dir)
+
+    # --- Path 3: The 'common/waftools' directory for the 'resources' package ---
+    common_waftools_dir = os.path.join(sdk_dir, 'common', 'waftools')
+    sys.path.insert(0, common_waftools_dir)
+
+
+    # --- Load the Tool ---
+    # Now that all three required directories are on the path, load the tool.
     ctx.load('pebble_sdk')
+
 
 
 def configure(ctx):
